@@ -1,22 +1,45 @@
-name: security gate
-
-on:
-  push:
+name: Security Gate
+on: [push, pull_request]
 
 jobs:
-  forbidden-file-check:
+  security-scan:
     runs-on: ubuntu-latest
-
     steps:
-      - name: checkout repository
-        uses: actions/checkout@v4
-
-      - name: block forbidden files
+      - uses: actions/checkout@v4
+      - name: comprehensive security scan
+        shell: bash
         run: |
-          if [ -f passwords.txt ]; then
-            echo "forbidden file detected: passwords.txt"
-            exit 1
-          else
-            echo "no forbidden files found"
-            exit 0
+          set -e
+
+          FORBIDDEN_FILES=(
+            "passwords.txt"
+            "id_rsa"
+            ".env"
+            "secrets.json"
+            "credentials.yml"
+          )
+
+          FOUND_VIOLATIONS=0
+
+          echo "starting security gate scan..."
+
+          for FILE in "${FORBIDDEN_FILES[@]}"; do
+            if [ -f "$FILE" ]; then
+              echo "security violation: forbidden file detected -> $FILE"
+              FOUND_VIOLATIONS=1
+            fi
+          done
+
+          if find . \( -name "*.pem" -o -name "*.key" \) -type f ! -path './.git/*' ! -path './.github/*' ! -path './node_modules/*' | grep -q .; then
+            echo "security violation: private key files (.pem or .key) detected"
+            FOUND_VIOLATIONS=1
           fi
+
+          if [ "$FOUND_VIOLATIONS" -eq 1 ]; then
+            echo ""
+            echo "=== pipeline blocked by security gate ==="
+            echo "remove sensitive files and try again"
+            exit 1
+          fi
+
+          echo "security scan passed. pipeline proceeding..."
