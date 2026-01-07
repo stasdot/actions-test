@@ -1,4 +1,4 @@
-name: injection test (vulnerable)
+name: injection test (fixed)
 
 on:
   issues:
@@ -8,7 +8,9 @@ jobs:
   issue-handler:
     runs-on: ubuntu-latest
     steps:
-      - name: vulnerable issue title usage
+      - name: safe issue title handling
         shell: bash
+        env:
+          ISSUE_TITLE: ${{ github.event.issue.title }}
         run: |
-          echo "new issue title is: ${{ github.event.issue.title }}"
+          echo "new issue title is: $ISSUE_TITLE"
