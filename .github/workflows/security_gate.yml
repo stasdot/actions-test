@@ -1,0 +1,22 @@
+name: security gate
+
+on:
+  push:
+
+jobs:
+  forbidden-file-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: block forbidden files
+        run: |
+          if [ -f passwords.txt ]; then
+            echo "forbidden file detected: passwords.txt"
+            exit 1
+          else
+            echo "no forbidden files found"
+            exit 0
+          fi
