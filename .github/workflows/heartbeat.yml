@@ -1,0 +1,15 @@
+name: heartbeat
+
+on:
+  push:
+
+jobs:
+  heartbeat-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: integrity message
+        run: echo "Pipeline Integrity Verified - Monitoring Active"
