@@ -9,4 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: vulnerable issue title usage
-        run: echo "new issue title is: ${{ github.event.issue.title }}"
+        shell: bash
+        run: |
+          echo "new issue title is: ${{ github.event.issue.title }}"
